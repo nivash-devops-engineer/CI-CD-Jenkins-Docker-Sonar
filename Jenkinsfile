@@ -14,7 +14,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/nivash-devops-engineer/CI-CD-Jenkins-Docker-Sonar.git'
+                checkout scm
             }
         }
 
