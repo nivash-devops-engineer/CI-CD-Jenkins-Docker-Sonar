@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "nivashdevops/cicd-demo"
+        SONAR_TOKEN = "sqa_8960987282688624e3ea8d02706741f14aed689d"
     }
 
     stages {
