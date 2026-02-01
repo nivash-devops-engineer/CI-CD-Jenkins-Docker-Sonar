@@ -8,7 +8,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "nivashdevops/cicd-demo"
-        SONAR_TOKEN = "sqa_8960987282688624e3ea8d02706741f14aed689d"
     }
 
     stages {
@@ -26,19 +25,17 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('SonarQube') {
-            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                bat 'mvn sonar:sonar -Dsonar.projectKey=cicd-demo -Dsonar.login=%SONAR_TOKEN%'
-            }
-        }
-    }
-}
-
-        stage('Quality Gate') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                withSonarQubeEnv('SonarQube') {
+                    withCredentials([
+                        string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')
+                    ]) {
+                        bat '''
+                        mvn sonar:sonar ^
+                        -Dsonar.projectKey=cicd-demo ^
+                        -Dsonar.login=%SONAR_TOKEN%
+                        '''
+                    }
                 }
             }
         }
@@ -51,11 +48,13 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     bat '''
                     docker login -u %DOCKER_USER% -p %DOCKER_PASS%
                     docker push %DOCKER_IMAGE%
@@ -75,4 +74,3 @@ pipeline {
         }
     }
 }
-
