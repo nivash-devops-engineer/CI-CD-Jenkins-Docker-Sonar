@@ -25,12 +25,14 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    bat 'mvn sonar:sonar -Dsonar.projectKey=cicd-demo'
-                }
+    steps {
+        withSonarQubeEnv('SonarQube') {
+            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                bat 'mvn sonar:sonar -Dsonar.projectKey=cicd-demo -Dsonar.login=%SONAR_TOKEN%'
             }
         }
+    }
+}
 
         stage('Quality Gate') {
             steps {
